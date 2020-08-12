@@ -5,18 +5,10 @@
  */
 class Node
 {
-    /**
-     * Значение узла
-     * 
-     * @var string 
-    */
+    /** @var string Значение узла */
     private $nodeValue;
 
-    /**
-     * Ссылка на следующий узел
-     * 
-     * @var Node 
-     */
+    /** @var Node Ссылка на следующий узел */
     private $nextNode;
 
     public function __construct(string $nodeValue, ?Node $nextNode = null)

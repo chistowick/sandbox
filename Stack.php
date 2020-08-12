@@ -2,11 +2,7 @@
 
 class Stack
 {
-    /**
-     * Указатель на верхний элемент стека 
-     * 
-     * @var Node
-     */
+    /** @var Node Указатель на верхний элемент стека */
     private $last;
 
     public function __construct()
@@ -17,7 +13,7 @@ class Stack
     /**
      * Добавляет в стек новый элемент
      *
-     * @param string $item - новый элемент
+     * @param string $value - значение нового элемента
      * @return void
      **/
     public function push(string $value)
