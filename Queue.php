@@ -1,6 +1,6 @@
 <?php
 
-class Queue
+class Queue extends LinkedList
 {
 
     /** @var Node $first Указатель на первый элемент очереди */

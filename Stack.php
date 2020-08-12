@@ -1,6 +1,6 @@
 <?php
 
-class Stack
+class Stack extends LinkedList
 {
     /** @var Node Указатель на верхний элемент стека */
     private $last;
