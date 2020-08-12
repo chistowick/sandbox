@@ -88,4 +88,15 @@ class Queue
         // Очередь пустая, когда $first был назначен указывать на null
         return ($this->first === null);
     }
+
+    /**
+     * Получить first-элемент, но не удалять
+     *
+     * @param void
+     * @return object|null Node
+     **/
+    public function top(): ?object
+    {
+        return $this->first;
+    }
 }

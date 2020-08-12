@@ -63,4 +63,15 @@ class Stack
         // Стек пуст, когда $last был назначен указывать на null
         return ($this->last === null);
     }
+
+    /**
+     * Получить last-элемент, но не удалять
+     *
+     * @param void
+     * @return object|null Node
+     **/
+    public function top(): ?object
+    {
+        return $this->last;
+    }
 }
