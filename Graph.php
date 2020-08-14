@@ -4,6 +4,7 @@
  * Граф (взвешенный, неориентированный)
  * 
  * Для реализации итеративного DFS необходимо подключение классов Node, Stack и LinkedList
+ * Для реализации итеративного DFS необходимо подключение классов Node, Queue и LinkedList
  */
 class Graph
 {
@@ -144,6 +145,48 @@ class Graph
                 foreach ($this->getAdjacentEdges($currentVertex) as $vertex_to => $weight) {
                     // Каждую помещаем в стек
                     $S->push($vertex_to);
+                }
+            }
+        }
+    }
+
+    /**
+     * Итеративный поиск "сначала в шириину" (Breadth-first search)
+     * Заполняет массив известных вершин $discovered
+     *
+     * @param string $vertexName Имя стартовой вершины
+     * @return void
+     **/
+    public function iterativeBfs(string $vertexName): void
+    {
+        // Предварительно опустошаем массив известных вершин
+        $this->discovered = [];
+
+        $Q = new Queue();
+
+        // Запоминаем стартовую вершину
+        $this->discovered[$vertexName] = true;
+
+        // Помещаем стартовую вершину в очередь
+        $Q->enqueue($vertexName);
+
+        // Пока очередь не пуста
+        while (!$Q->isEmpty()) {
+
+            // Извлекаем вершину из головы очереди
+            $currentVertex = $Q->dequeue();
+
+            // Итерируем смежные вершины 
+            foreach ($this->getAdjacentEdges($currentVertex) as $vertex_to => $weight) {
+
+                // Если смежная вершина ещё не известна
+                if (!isset($this->discovered[$vertex_to])) {
+
+                    // Запоминаем её
+                    $this->discovered[$vertex_to] = true;
+
+                    // И помещаем в конец очереди
+                    $Q->enqueue($vertex_to);
                 }
             }
         }
