@@ -13,7 +13,7 @@ class BinaryHeap
     protected $mode;
 
     /** @var array $A Массив для хранения двоичной кучи */
-    public $A;
+    protected $A;
 
     /** @var int $heapSize Размер массива с кучей */
     protected $heapSize;
@@ -23,9 +23,14 @@ class BinaryHeap
      * @param array $startArray Массив данных для построения кучи (важно: ключи должны начинаться с 1)
      * @return void
      **/
-    public function __construct(string $mode = "max", array $startArray = [])
+    public function __construct(string $mode = 'max', array $startArray = [])
     {
-        $this->mode = $mode;
+        if (in_array($mode, ['max', 'min'])) {
+            $this->mode = $mode;
+        } else {
+            $this->mode = 'max';
+        }
+
         $this->A = $startArray;
         $this->heapSize = count($startArray);
 
@@ -98,8 +103,6 @@ class BinaryHeap
                 // и продолжаем применять heapify дальше
                 $this->heapify($smallest);
             }
-        } else {
-            echo "Что-то пошло не так! Mode для Heap не определен";
         }
     }
 
@@ -130,7 +133,7 @@ class BinaryHeap
      * @param void
      * @return void
      **/
-    public function heapSort()
+    public function sort()
     {
         // Начальный размер массива с кучей
         $heapSize = $this->heapSize;
@@ -153,54 +156,141 @@ class BinaryHeap
     }
 
     /**
-     * Изменение значения элемента
+     * Изменение значения приоритета элемента
      *
-     * @param int $index Индекс элемента, приоритет которого нужно увеличить в max-heap
+     * @param int $index Индекс элемента, приоритет которого нужно изменить
      * @param string $newPriority Новое значение приоритета
      * @return void
      **/
-    public function HeapIncreasePriority(int $index, string $newPriority)
+    public function changePriority(int $index, string $newPriority)
     {
-        # code...
-    }
+        if ($index > $this->heapSize) {
+            echo "Элемента с таким индексом не существует";
+            return;
+        }
+        $lastPriority = $this->A[$index];
 
-    /**
-     * Изменение значения элемента
-     *
-     * @param int $index Индекс элемента, приоритет которого нужно уменьшить в min-heap
-     * @param string $newPriority Новое значение приоритета
-     * @return void
-     **/
-    public function HeapDecreasePriority(int $index, string $newPriority)
-    {
-        # code...
+        // Меняем приоритет элемента с заданным индексом на новый
+        $this->A[$index] = $newPriority;
+
+        // В режиме max-heap
+        if ($this->mode === 'max') {
+
+            // Если новый приоритет меньше, чем прежний
+            if ($newPriority < $lastPriority) {
+
+                // Просто вызываем heapify для измененного элемента и сортируем его в низ кучи
+                $this->heapify($index);
+            } else {
+
+                /**
+                 * Иначе пока не достигнута вершина, и пока родитель меньше текущего элемента,
+                 * продолжаем "всплытие" измененного элемента
+                 */
+                while (($index > 1) && ($this->A[intdiv($index, 2)] < $this->A[$index])) {
+
+                    // Меняем родителя и текущий элемент местами
+                    $temp = $this->A[$index];
+                    $this->A[$index] = $this->A[intdiv($index, 2)];
+                    $this->A[intdiv($index, 2)] = $temp;
+
+                    // Новый индекс элемента
+                    $index = intdiv($index, 2);
+                }
+            }
+        } elseif ($this->mode === 'min') {
+            // В режиме min-heap
+
+            // Если новый приоритет больше, чем прежний
+            if ($newPriority > $lastPriority) {
+
+                // Просто вызываем heapify для измененного элемента и сортируем его в низ кучи
+                $this->heapify($index);
+            } else {
+
+                /**
+                 * Иначе пока не достигнута вершина, и пока родитель больше текущего элемента,
+                 * продолжаем "всплытие" измененного элемента
+                 */
+                while (($index > 1) && ($this->A[intdiv($index, 2)] > $this->A[$index])) {
+
+                    // Меняем родителя и текущий элемент местами
+                    $temp = $this->A[$index];
+                    $this->A[$index] = $this->A[intdiv($index, 2)];
+                    $this->A[intdiv($index, 2)] = $temp;
+
+                    // Новый индекс элемента
+                    $index = intdiv($index, 2);
+                }
+            }
+        }
     }
 
     /**
      * Добавление произвольного элемента в конец кучи, 
-     * и восстановление свойства упорядоченности с помощью Heap_Increase_Key
+     * и восстановление свойства упорядоченности с помощью changePriority()
      *
      * @param string $priority Значение приоритета, добавляемого элемента
      * @return void
      **/
-    public function heapInsert(string $priority)
+    public function insert(string $priority)
     {
-        # code...
+        // Увеличиваем величину массива кучи на "1"
+        $this->heapSize++;
+
+        // Добавляем новый элемент в конец кучи с заведомо завышенным/заниженным приоритетом
+        if ($this->mode === 'max') {
+            $this->A[$this->heapSize] = -INF;
+        } elseif ($this->mode === 'min') {
+            $this->A[$this->heapSize] = INF;
+        }
+
+        // Меняем значение на необходимое
+        $this->changePriority($this->heapSize, $priority);
     }
 
     /**
-     * Возвращает значение корневого элемента
-     * 
-     * 1) значение корневого элемента сохраняется для последующего возврата,
-     * 2) последний элемент копируется в корень, после чего удаляется из кучи,
-     * 3) вызывается Heapify для корня, 
-     * 4) сохранённый элемент возвращается
+     * Возвращает значение корневого элемента и удаляет его из кучи, затем восстанавливает свойства кучи
      *
      * @param void
      * @return string
      **/
-    public function HeapExtractTop()
+    public function extractTop()
     {
-        # code...
+        if ($this->heapSize == 0) {
+            echo "Куча пуста!";
+            return;
+        }
+
+        // Запоминаем верхний элемент
+        $top = $this->A[1];
+
+        if ($this->heapSize > 1) {
+
+            // Копируем последний элемент в корень дерева (top) и удаляем его (последний элемент) из массива кучи
+            $this->A[1] = array_pop($this->A);
+        } else {
+            // Иначе просто удаляем последний элемент из кучи
+            array_pop($this->A);
+        }
+
+        // Устанавливаем действительное значение размера массива с кучей
+        $this->heapSize = count($this->A);
+
+        // Вызываем Heapify для корня
+        $this->heapify(1);
+
+        return $top;
+    }
+
+    /**
+     * Распечатывает массив с кучей
+     *
+     * @param void
+     * @return void
+     **/
+    public function printHeap()
+    {
+        return print_r($this->A);
     }
 }
