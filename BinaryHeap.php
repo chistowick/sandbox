@@ -8,11 +8,10 @@
  */
 class BinaryHeap
 {
-
     /** @var string $mode max|min для режимов max-heap|min-heap соответственно */
     protected $mode;
 
-    /** @var array $A Массив для хранения двоичной кучи */
+    /** @var array $A Массив для хранения объектов двоичной кучи */
     protected $A;
 
     /** @var int $heapSize Размер массива с кучей */
@@ -20,7 +19,7 @@ class BinaryHeap
 
     /**
      * @param string $mode max|min для режимов max-heap|min-heap соответственно
-     * @param array $startArray Массив данных для построения кучи (важно: ключи должны начинаться с 1)
+     * @param array $startArray Массив объектов класса Node с данными для построения кучи $key=>$priority (важно: ключи должны начинаться с 1)
      * @return void
      **/
     public function __construct(string $mode = 'max', array $startArray = [])
@@ -54,18 +53,19 @@ class BinaryHeap
         $heapSize = $this->heapSize;
 
         /**
-         * Сравниваем значение измененного элемента с потомками
-         * и меняем местами с наибольшим/наименьшим(в зависимости от mode), если это необходимо
+         * Сравниваем значение измененного приоритета элемента с приоритетами потомков
+         * и меняем местами с элементом с наибольшим/наименьшим(в зависимости от mode) приоритетом, 
+         * если это необходимо
          */
         if ($this->mode === "max") {
 
             $largest = $index;
 
-            if ($left <= $heapSize && ($this->A[$left] > $this->A[$largest])) {
+            if ($left <= $heapSize && ($this->A[$left]->getPriority() > $this->A[$largest]->getPriority())) {
                 $largest = $left;
             }
 
-            if ($right <= $heapSize && ($this->A[$right] > $this->A[$largest])) {
+            if ($right <= $heapSize && ($this->A[$right]->getPriority() > $this->A[$largest]->getPriority())) {
                 $largest = $right;
             }
 
@@ -84,11 +84,11 @@ class BinaryHeap
 
             $smallest = $index;
 
-            if ($left <= $heapSize && ($this->A[$left] < $this->A[$smallest])) {
+            if ($left <= $heapSize && ($this->A[$left]->getPriority() < $this->A[$smallest]->getPriority())) {
                 $smallest = $left;
             }
 
-            if ($right <= $heapSize && ($this->A[$right] < $this->A[$smallest])) {
+            if ($right <= $heapSize && ($this->A[$right]->getPriority() < $this->A[$smallest]->getPriority())) {
                 $smallest = $right;
             }
 
@@ -125,7 +125,7 @@ class BinaryHeap
     }
 
     /**
-     * Пирамидальная сортировка массива данных без привлечения дополнительной памяти (вспомогательная функция)
+     * Пирамидальная сортировка массива объектов с данными без привлечения дополнительной памяти (вспомогательная функция)
      * Modes:
      * min - по убыванию
      * max - по возрастанию
@@ -168,10 +168,10 @@ class BinaryHeap
             echo "Элемента с таким индексом не существует";
             return;
         }
-        $lastPriority = $this->A[$index];
+        $lastPriority = $this->A[$index]->getPriority();
 
         // Меняем приоритет элемента с заданным индексом на новый
-        $this->A[$index] = $newPriority;
+        $this->A[$index]->setPriority($newPriority);
 
         // В режиме max-heap
         if ($this->mode === 'max') {
@@ -184,10 +184,10 @@ class BinaryHeap
             } else {
 
                 /**
-                 * Иначе пока не достигнута вершина, и пока родитель меньше текущего элемента,
-                 * продолжаем "всплытие" измененного элемента
+                 * Иначе пока не достигнута вершина, и пока приоритет родителя меньше приоритета текущего элемента,
+                 * продолжаем "всплытие" элемента с новым приоритетом
                  */
-                while (($index > 1) && ($this->A[intdiv($index, 2)] < $this->A[$index])) {
+                while (($index > 1) && ($this->A[intdiv($index, 2)]->getPriority() < $this->A[$index]->getPriority())) {
 
                     // Меняем родителя и текущий элемент местами
                     $temp = $this->A[$index];
@@ -209,10 +209,10 @@ class BinaryHeap
             } else {
 
                 /**
-                 * Иначе пока не достигнута вершина, и пока родитель больше текущего элемента,
-                 * продолжаем "всплытие" измененного элемента
+                 * Иначе пока не достигнута вершина, и пока приоритет родителя больше приоритета текущего элемента,
+                 * продолжаем "всплытие" элемента с новым приоритетом
                  */
-                while (($index > 1) && ($this->A[intdiv($index, 2)] > $this->A[$index])) {
+                while (($index > 1) && ($this->A[intdiv($index, 2)]->getPriority() > $this->A[$index]->getPriority())) {
 
                     // Меняем родителя и текущий элемент местами
                     $temp = $this->A[$index];
@@ -230,22 +230,23 @@ class BinaryHeap
      * Добавление произвольного элемента в конец кучи, 
      * и восстановление свойства упорядоченности с помощью changePriority()
      *
-     * @param string $priority Значение приоритета, добавляемого элемента
+     * @param string $value Значение, добавляемого элемента
+     * @param string $priority Приоритет, добавляемого элемента
      * @return void
      **/
-    public function insert(string $priority)
+    public function insert(string $value, string $priority)
     {
         // Увеличиваем величину массива кучи на "1"
         $this->heapSize++;
 
-        // Добавляем новый элемент в конец кучи с заведомо завышенным/заниженным приоритетом
+        // Добавляем новый элемент Node в конец кучи с заведомо завышенным/заниженным приоритетом
         if ($this->mode === 'max') {
-            $this->A[$this->heapSize] = -INF;
+            $this->A[$this->heapSize] = new Node($value, null, -INF);
         } elseif ($this->mode === 'min') {
-            $this->A[$this->heapSize] = INF;
+            $this->A[$this->heapSize] = new Node($value, null, INF);
         }
 
-        // Меняем значение на необходимое
+        // Меняем значение на необходимое (после чего свойства кучи будут восстановлены средствами changePriority)
         $this->changePriority($this->heapSize, $priority);
     }
 
@@ -253,7 +254,7 @@ class BinaryHeap
      * Возвращает значение корневого элемента и удаляет его из кучи, затем восстанавливает свойства кучи
      *
      * @param void
-     * @return string
+     * @return object Объект класса Node
      **/
     public function extractTop()
     {
@@ -292,5 +293,47 @@ class BinaryHeap
     public function printHeap()
     {
         return print_r($this->A);
+    }
+
+    /**
+     * Проверяет кучу на наличие в ней элементов
+     *
+     * @param void
+     * @return bool - true - куча пустая, false - не пустая
+     **/
+    public function isEmpty(): bool
+    {
+        // Куча пустая, когда размер массива с кучей равен нулю
+        return ($this->heapSize == 0);
+    }
+
+    /**
+     * Проверяет наличие элемента $node в куче
+     *
+     * @param Node $node Искомый node
+     * @return bool true - элемент есть в куче, false - нет
+     **/
+    public function nodeExist(Node $node): bool
+    {
+        return in_array($node, $this->A);
+    }
+
+    /**
+     * Получить ключ (первого найденного) node в массиве кучи по $nodeValue
+     * (полезно, когда все значения в куче уникальны)
+     *
+     * @param string $nodeValue Значение искомого узла
+     * @return string Первый найденный ключ искомого узла
+     **/
+    public function firstKey(string $nodeValue): string
+    {
+        // Итерируем всю кучу
+        foreach ($this->A as $key => $node) {
+
+            // Как только найден node с необходимым значением, возвращаем ключ этого node
+            if ($node->getNodeValue() == $nodeValue) {
+                return $key;
+            }
+        }
     }
 }
