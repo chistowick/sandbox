@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Очередь на основе связного списка
+ */
 class Queue extends LinkedList
 {
 
@@ -22,7 +25,7 @@ class Queue extends LinkedList
      * @param string $value - значение добавляемого узла
      * @return void
      **/
-    public function enqueue(string $value)
+    public function enqueue(string $value): void
     {
         // Создать новый элемент
         $newNode = new Node($value);
