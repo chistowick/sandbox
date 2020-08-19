@@ -5,6 +5,7 @@
  * 
  * Для реализации итеративного DFS необходимо подключение классов Node, Stack и LinkedList
  * Для реализации итеративного DFS необходимо подключение классов Node, Queue и LinkedList
+ * Для реализации алгоритма Дейкстры необходим класс BinaryHeap
  */
 class Graph
 {
@@ -190,6 +191,152 @@ class Graph
                 }
             }
         }
+    }
+
+    /**
+     * Алгоритм Дейкстры
+     * 
+     * @param string $source Исток
+     * @return array Массив дистанций и предшественников
+     **/
+    public function Dijkstra(string $source)
+    {
+        // Проверяем наличие вершины-источника в графе
+        if (!array_key_exists($source, $this->adjacencyMatrix)) {
+            echo "Вершина не найдена";
+            return;
+        }
+        // Расстояние от source до определенной вершины
+        $distance = [];
+        // Указатель на предыдущую вершину в найденном маршруте
+        $previous = [];
+
+        // Массив с информацией о посещенных вершинах
+        $visited = [];
+
+        // Считаем путь от истока до самого себя равным нулю
+        $distance[$source] = 0;
+
+        // Создаем очередь с приоритетом на основе двоичной кучи в режиме min-heap
+        $prQ = new BinaryHeap('min');
+
+        // Изначально, для всех вершин графа
+        foreach ($this->adjacencyMatrix as $vertex_from => $value) {
+            // кроме источника
+            if ($vertex_from != $source) {
+
+                // считаем дистанцию от истока до этих вершин ($vertex_from) бесконечной
+                $distance[$vertex_from] = INF;
+
+                // а предыдущую вершину для $vertex_from в кротчайшем пути от истока - неопределенной
+                $previous[$vertex_from] = null;
+            }
+
+            /**
+             * все вершины вместе с истоком добавляем в очередь с приоритетами равными принятой дистанции до них
+             * (куча при добавлении элементов автоматически их встраивает в кучу)
+             */
+            $prQ->insert($vertex_from, $distance[$vertex_from]);
+
+            // Считаем все вершины непосещенными
+            $visited[$vertex_from] = false;
+        }
+
+        // Пока куча не пустая
+        while (!$prQ->isEmpty()) {
+
+            /**
+             * Извлекаем и удаляем из кучи Node вершину с наименьшим приоритетом 
+             * (наименьшим расстоянием от истока до неё)
+             */
+            $currentNode = $prQ->extractTop();
+
+            // Получаем имя текущей вершины
+            $currentVertex = $currentNode->getNodeValue();
+
+            // Запоминаем вершину как посещенную
+            $visited[$currentVertex] = true;
+
+            // Для всех соседей текущей вершины
+            foreach ($this->getAdjacentEdges($currentVertex) as $vertex_to => $weight) {
+
+                // которые ещё присутствуют в куче (то есть не посещены)
+                if (!$visited[$vertex_to]) {
+
+                    /**
+                     * Складываем значение дистанции от истока до текущей вершины с дистанцией (весом) 
+                     * до соседней вершины - таким образом находим возможное расстояние до $vertex_to
+                     */
+                    $alt = $distance[$currentVertex] + $weight;
+
+                    // если найденное расстояние короче уже известного наикратчайшего пути
+                    if ($alt < $distance[$vertex_to]) {
+
+                        // Перезаписваем кратчайший путь новым значением
+                        $distance[$vertex_to] = $alt;
+
+                        /**
+                         * Ставим метку о том, что последний наикратчайший путь к вершине $vertex_to 
+                         * был проложен из вершины $currentVertex
+                         */
+                        $previous[$vertex_to] = $currentVertex;
+
+                        // В куче находим ключ node, соответствующего вершине $vertex_to
+                        $index = $prQ->firstKey($vertex_to);
+
+                        /**
+                         * Соответственно понижаем приоритет узла с вершиной $vertex_to до нового значения,
+                         * равного наименьшей известной дистанции (весу) до $vertex_to
+                         */
+                        $prQ->changePriority($index, $alt);
+                    }
+                }
+            }
+        }
+
+        return array($distance, $previous);
+    }
+
+    /**
+     * Поиск характеристик кратчайшего маршрута между вершинами
+     *
+     * @param string $from Исток
+     * @param string $to Сток
+     * @return array (Вес, Путь)
+     **/
+    public function shortestRoute(string $from, string $to)
+    {
+        if(!isset($from, $to)){
+
+            echo "Ошибка в указании начала или конца пути";
+            return;
+        }
+
+        list($distance, $previous) = $this->Dijkstra($from);
+
+        // Вес маршрута из массива наименьших весов
+        $weight = $distance[$to];
+
+        $steps[] = $to;
+
+        while ($previous[$to] != $from) {
+
+            $steps[] = $previous[$to];
+            $to = $previous[$to];
+        }
+
+        $steps[] = $from;
+
+        $path = "";
+
+        while ($steps) {
+            $path .= array_pop($steps);
+            $path .= ">";
+        }
+
+        $path = trim($path, ">");
+
+        return array($weight, $path);
     }
 
     /**
