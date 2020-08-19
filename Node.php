@@ -1,7 +1,11 @@
 <?php
 
 /**
- * Узел односвязного списка
+ * Узел
+ * 
+ * Опционально:
+ * + Связь с другим узлом
+ * + Значение приоритета узла
  */
 class Node
 {
@@ -11,10 +15,14 @@ class Node
     /** @var Node Ссылка на следующий узел */
     private $nextNode;
 
-    public function __construct(string $nodeValue, ?Node $nextNode = null)
+    /** @var string $priority Значение приоритета узла */
+    protected $priority;
+
+    public function __construct(string $nodeValue, ?Node $nextNode = null, string $priority = null)
     {
         $this->nodeValue = $nodeValue;
         $this->nextNode = $nextNode;
+        $this->priority = $priority;
     }
 
     public function getNodeValue() : string
@@ -30,5 +38,27 @@ class Node
     public function setNextNode(Node $node) : void
     {
         $this->nextNode = $node;
+    }
+
+    /**
+     * Возвращает значение приоритета узла
+     *
+     * @param void
+     * @return string
+     **/
+    public function getPriority(): string
+    {
+        return $this->priority;
+    }
+
+    /**
+     * Меняет приоритет узла
+     *
+     * @param string $newPriority Новое значение приоритета
+     * @return void
+     **/
+    public function setPriority(string $newPriority): void
+    {
+        $this->priority = $newPriority;
     }
 }
